@@ -1,5 +1,6 @@
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 
 import org.openqa.selenium.WebElement;
@@ -8,6 +9,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,20 +48,134 @@ public class Automations {
         WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[1]/div/iframe")));
         //Add frame
         _globalDriver.switchTo().frame(iframe);
-
+        // Move element
         WebElement dragOne = _globalDriver.findElement(By.id("draggable"));
         Actions actions = new Actions(_globalDriver);
 
-        actions.clickAndHold(dragOne)
-                .moveByOffset(200, 600)
-                .release()
-                .perform();
+        Point beforeMove = dragOne.getLocation();
 
-        dragOne.getAttribute("po")
+        actions.clickAndHold(dragOne).moveByOffset(400, 600).release().perform();
 
+        Point afterMove = dragOne.getLocation();
 
+        Assert.assertEquals(beforeMove.getX() + 400, afterMove.getX());
+        Assert.assertEquals(beforeMove.getY() + 600, afterMove.getY());
 
     }
+
+    @Test
+    public void constrainMovement() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/draggable.php#load_box");
+        _globalDriver.findElement(By.xpath("/html/body/section/div[1]/div[1]/div[1]/ul/li[2]/a")).click();
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[2]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+        //Vertical drag
+        WebElement dragVertically = _globalDriver.findElement(By.xpath("/html/body/div[1]"));
+        Point beforeMove = dragVertically.getLocation();
+        actions.clickAndHold(dragVertically).moveByOffset(100, 100).release().perform();
+        Point afterMove = dragVertically.getLocation();
+
+        Assert.assertNotEquals(beforeMove.getX() + 100, afterMove.getX());
+
+        //Horizontal drag
+        WebElement dragHorizontally = _globalDriver.findElement(By.xpath("/html/body/div[2]"));
+        beforeMove = dragHorizontally.getLocation();
+        actions.clickAndHold(dragHorizontally).moveByOffset(100, 100).release().perform();
+        afterMove = dragHorizontally.getLocation();
+
+        Assert.assertNotEquals(beforeMove.getY() + 100, afterMove.getY());
+
+        //Move out of the box drag
+        WebElement moveOutOfTheBox = _globalDriver.findElement(By.xpath("/html/body/div[3]/div[1]"));
+        boolean testFlag = false;
+        try {
+            actions.clickAndHold(moveOutOfTheBox).moveByOffset(1000, 1000).release().perform();
+        }catch (Exception e){
+            testFlag = true;
+        }
+        Assert.assertTrue(testFlag);
+        actions.release();
+        //Move out of the box drag
+        WebElement moveOutOfTheSmallBox = _globalDriver.findElement(By.xpath("/html/body/div[3]/div[2]/p"));
+        testFlag = false;
+        try {
+            actions.clickAndHold(moveOutOfTheSmallBox).moveByOffset(1000, 1000).release().perform();
+        }catch (Exception e){
+            testFlag = true;
+        }
+        Assert.assertTrue(testFlag);
+        actions.release();
+
+    }
+
+    @Test
+    public void dragAndDropToBox() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/droppable.php#load_box");
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[1]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+        WebElement elementToDrag = _globalDriver.findElement(By.xpath("/html/body/div[1]"));
+        WebElement elementToDropIn = _globalDriver.findElement(By.xpath("/html/body/div[2]"));
+
+
+        actions.dragAndDrop(elementToDrag,elementToDropIn).perform();
+
+        String resultText = _globalDriver.findElement(By.xpath("/html/body/div[2]/p")).getText();
+
+        Assert.assertEquals(resultText,"Dropped!");
+
+    }
+
+    @Test
+    public void dragAndDropToMultipleBox() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/droppable.php#load_box");
+        _globalDriver.findElement(By.xpath("/html/body/section/div[1]/div[1]/div[1]/ul/li[3]/a")).click();
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[3]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+        WebElement elementToDrag = _globalDriver.findElement(By.id("draggable"));
+        WebElement elementToDropToOne = _globalDriver.findElement(By.id("droppable"));
+        WebElement elementToDropToTwo = _globalDriver.findElement(By.id("droppable2"));
+        WebElement elementToDropToTree = _globalDriver.findElement(By.id("droppable-inner"));
+        WebElement elementToDropToFour = _globalDriver.findElement(By.id("droppable2-inner"));
+
+        actions.dragAndDrop(elementToDrag,elementToDropToOne).perform();
+        actions.clickAndHold(elementToDrag).moveToElement(elementToDropToTwo).moveByOffset(0,-50).release().perform();
+        actions.dragAndDrop(elementToDrag,elementToDropToTree).perform();
+        actions.dragAndDrop(elementToDrag,elementToDropToFour).perform();
+
+        String resultTextOne = _globalDriver.findElement(By.xpath("/html/body/div[2]/p")).getText();
+        String resultTextTwo = _globalDriver.findElement(By.xpath("/html/body/div[2]/div/p")).getText();
+        String resultTextThree = _globalDriver.findElement(By.xpath("/html/body/div[3]/p")).getText();
+        String resultTextFour = _globalDriver.findElement(By.xpath("/html/body/div[3]/div/p")).getText();
+
+        Assert.assertEquals(resultTextOne,"Dropped!");
+        Assert.assertEquals(resultTextTwo,"Dropped!");
+        Assert.assertEquals(resultTextThree,"Dropped!");
+        Assert.assertEquals(resultTextFour,"Dropped!");
+
+    }
+
+
+
+
+
 
 
 
