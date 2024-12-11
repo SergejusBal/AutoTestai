@@ -173,12 +173,96 @@ public class Automations {
     }
 
 
+    @Test
+    public void resizeSimple() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/resizable.php#load_box");
+       // _globalDriver.findElement(By.xpath("/html/body/section/div[1]/div[1]/div[1]/ul/li[3]/a")).click();
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[1]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+
+        WebElement dragButton = _globalDriver.findElement(By.xpath("/html/body/div/div[3]"));
+        Point beforeResize = dragButton.getLocation();
+        actions.clickAndHold(dragButton).moveByOffset(100,100).release().perform();
+
+        Point afterResize = dragButton.getLocation();
+
+        Assert.assertEquals(afterResize.getX(),beforeResize.getX()+100);
+
+    }
+
+
+    @Test
+    public void resizeAnimated() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/resizable.php#load_box");
+         _globalDriver.findElement(By.xpath("/html/body/section/div[1]/div[1]/div[1]/ul/li[2]/a")).click();
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[2]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+
+        WebElement dragButton = _globalDriver.findElement(By.xpath("/html/body/div/div[3]"));
+        Point beforeResize = dragButton.getLocation();
+        actions.clickAndHold(dragButton).moveByOffset(200,200).release().perform();
+        Point afterResize = dragButton.getLocation();
+
+        boolean testFlag = false;
+        try {
+            Assert.assertEquals(afterResize.getX(),beforeResize.getX()+200);
+        }catch (AssertionError e){
+            testFlag = true;
+        }
+        Assert.assertTrue(testFlag);
+
+        Thread.sleep(1000);
+        afterResize = dragButton.getLocation();
+        Assert.assertEquals(afterResize.getX(),beforeResize.getX()+200);
+    }
+
+    @Test
+    public void selectable() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/resizable.php#load_box");
+        _globalDriver.findElement(By.xpath("/html/body/section/div[1]/div[2]/div[1]/ul/li[4]/a")).click();
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[2]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+        Actions actions = new Actions(_globalDriver);
+
+    }
 
 
 
+    @Test
+    public void accordion() throws InterruptedException {
+        Thread.sleep(2000);
+        _globalDriver.get("https://www.way2automation.com/way2auto_jquery/accordion.php#load_box");
+        //  Switch to iframe here
+        WebDriverWait wait = new WebDriverWait(_globalDriver, Duration.ofSeconds(5));
+        WebElement iframe = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/section/div[1]/div[1]/div[3]/div[1]/div/iframe")));
+        //Add frame
+        _globalDriver.switchTo().frame(iframe);
+       // click on one part
+        _globalDriver.findElement(By.id("ui-id-3")).click();
 
+        WebElement openedSection =  _globalDriver.findElement(By.id("ui-id-4"));
 
+        String displayValue = openedSection.getAttribute("Display");
 
+        Assert.assertEquals("block",displayValue);
+
+    }
 
 
 
